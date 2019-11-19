@@ -1,0 +1,5 @@
+class RaftProtocol
+{
+    SIGNAL(RequestVote(QString id))
+    SLOT(AppendEntries(QString id));
+};
