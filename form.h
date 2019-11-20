@@ -19,6 +19,7 @@ class Form : public QWidget
     QString port;
 public:
     explicit Form(QWidget *parent = nullptr);
+    void messageHandler(QtMsgType type, const QMessageLogContext&, const QString& msg);
     ~Form();
 
 private slots:
@@ -27,7 +28,7 @@ private slots:
     void on_pushButton_connect_clicked();
 
     void on_pushButton_send_clicked();
-
+    void changeRole(Role role);
 private:
     Ui::Form *ui;
 };

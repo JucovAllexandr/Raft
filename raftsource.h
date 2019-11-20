@@ -2,16 +2,33 @@
 #define RAFTPROTOCOL_H
 
 #include <rep_RaftProtocol_source.h>
+#include <QUuid>
+#include <Role.h>
 #include <QTimer>
 
-class RaftSource: public RaftProtocolSource
+class RaftSource: public RaftProtocolSimpleSource
 {
     Q_OBJECT
+    uint currentTerm = 1;
+    uint electionTimeout = 0;
+    Role role = Follower;
     QTimer timer;
+
 public:
     RaftSource(QObject *parent = nullptr);
-    void connectToSignal();
     void AppendEntries(QString id) override;
+    void ResponseVote(uint term, bool granted) override;
+
+    uint getCurrentTerm() const;
+
+    Role getRole() const;
+    uint getElectionTimeout() const;
+private:
+    void setRole(Role role);
+signals:
+    void roleChanged(Role role);
+private slots:
+    void timeOut();
 };
 
 #endif // RAFTPROTOCOL_H

@@ -1,7 +1,7 @@
 QT += gui core widgets
 QT += remoteobjects
 
-CONFIG += c++11 console app
+CONFIG += c++11 app
 
 REPC_SOURCE = RaftProtocol.rep
 REPC_REPLICA = RaftProtocol.rep
@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         form.cpp \
+        helper.cpp \
         main.cpp \
         raftreplica.cpp \
         raftsource.cpp
@@ -31,7 +32,9 @@ DISTFILES += \
     RaftProtocol.rep
 
 HEADERS += \
+    Role.h \
     form.h \
+    helper.h \
     raftreplica.h \
     raftsource.h
 
