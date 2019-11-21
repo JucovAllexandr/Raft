@@ -7,15 +7,13 @@ RaftReplica::RaftReplica(RaftProtocolReplica *replica, RaftSource *source):QObje
 
     connect(replica, &RaftProtocolReplica::RequestVote, this, &RaftReplica::requestVote);
     connect(replica, &RaftProtocolReplica::stateChanged, this, &RaftReplica::stateChanged);
-    connect(replica, &RaftProtocolReplica::idReturned, this, &RaftReplica::setId);
     //connect()
 }
 
 QUuid RaftReplica::Id()
 {
    // QSignalSpy spy(replica, &RaftProtocolReplica::idChanged);
-    replica->getId();
-    qDebug()<<"id"<<replica->id();
+   ///qDebug()<<"id"<<replica->getId().returnValue();
     return replica->id();
 }
 
@@ -32,9 +30,11 @@ void RaftReplica::requestVote(QUuid id, uint term)
 void RaftReplica::stateChanged(QRemoteObjectReplica::State state, QRemoteObjectReplica::State oldState)
 {
     qDebug() <<"Sate changed from "<<oldState<<" to "<< state;
+    if(state == QRemoteObjectReplica::State::Valid){
+        //qDebug()<<"get id"<<replica->getId().returnValue();
+
+            emit connected(this);
+
+    }
 }
 
-void RaftReplica::setId(QUuid id)
-{
-    qDebug()<<"set id "<<id.toString();
-}

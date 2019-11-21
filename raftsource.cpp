@@ -17,22 +17,28 @@ uint RaftSource::getElectionTimeout() const
     return electionTimeout;
 }
 
+void RaftSource::timerStart()
+{
+    timer.start(static_cast<int>(electionTimeout));
+}
+
 void RaftSource::setRole(Role role)
 {
     this->role = role;
     emit roleChanged(role);
 }
 
-void RaftSource::getId()
-{
-    emit idReturned(id());
-}
-
 void RaftSource::timeOut()
 {
     setRole(Candidate);
-    currentTerm++;
+    setCurrentTerm(currentTerm + 1);
     emit RequestVote(id(), currentTerm);
+}
+
+void RaftSource::setCurrentTerm(const uint &value)
+{
+    currentTerm = value;
+    emit termChanged(value);
 }
 
 RaftSource::RaftSource(QObject *parent):
@@ -52,4 +58,5 @@ void RaftSource::AppendEntries(QString id)
 void RaftSource::ResponseVote(uint term, bool granted)
 {
     qDebug()<<"Response vote "<<term<<" "<<granted;
+    timer.stop();
 }

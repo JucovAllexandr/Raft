@@ -17,6 +17,8 @@ class Form : public QWidget
     QRemoteObjectHost src;
     RaftSource raftSource;
     QString port;
+    QVector<QPair<QRemoteObjectNode*, RaftReplica*>> connections;
+
 public:
     explicit Form(QWidget *parent = nullptr);
     void messageHandler(QtMsgType type, const QMessageLogContext&, const QString& msg);
@@ -29,6 +31,8 @@ private slots:
 
     void on_pushButton_send_clicked();
     void changeRole(Role role);
+    void changeTerm(uint term);
+    void clientConnected(RaftReplica *rp);
 private:
     Ui::Form *ui;
 };

@@ -1,7 +1,7 @@
 #ifndef RAFTPROTOCOL_H
 #define RAFTPROTOCOL_H
 
-#include <rep_RaftProtocol_source.h>
+#include "rep_RaftProtocol_merged.h"
 #include <QUuid>
 #include <Role.h>
 #include <QTimer>
@@ -9,7 +9,7 @@
 class RaftSource: public RaftProtocolSimpleSource
 {
     Q_OBJECT
-    uint currentTerm = 1;
+    uint currentTerm = 0;
     uint electionTimeout = 0;
     Role role = Follower;
     QTimer timer;
@@ -23,13 +23,18 @@ public:
 
     Role getRole() const;
     uint getElectionTimeout() const;
+    void timerStart();
+
 private:
     void setRole(Role role);
+    void setCurrentTerm(const uint &value);
+
 signals:
     void roleChanged(Role role);
-public slots:
-    void getId() override;
+    void termChanged(uint term);
+
 private slots:
+
     void timeOut();
 };
 

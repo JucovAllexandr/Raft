@@ -12,8 +12,11 @@ Form::Form(QWidget *parent) :
     ui->label_electionTimeout->setNum(static_cast<int>(raftSource.getElectionTimeout()));
     ui->tableWidget->setColumnCount(2);
     ui->tableWidget->setHorizontalHeaderLabels(QStringList()<<"Uuid"<<"Ip");
+    ui->timeEdit->setTime(QTime::currentTime());
+
     connect(&raftSource, &RaftSource::roleChanged, this, &Form::changeRole);
     connect(&src, &QRemoteObjectHost::remoteObjectAdded, this, &Form::remoteObjectConnected);
+    connect(&raftSource, &RaftSource::termChanged, this, &Form::changeTerm);
 }
 
 void Form::messageHandler(QtMsgType type, const QMessageLogContext &, const QString &msg)
@@ -61,8 +64,10 @@ void Form::on_pushButton_connect_clicked()
     QString port = ui->lineEdit_connect->text();
     QRemoteObjectNode *repNode = new QRemoteObjectNode();
     repNode->connectToNode(QUrl("tcp://127.0.0.1:"+port));
+    repNode->setProperty("ip", "tcp://127.0.0.1:"+port);
 
     RaftReplica *rp = new RaftReplica(repNode->acquire<RaftProtocolReplica>(), &raftSource);
+    connect(rp, &RaftReplica::connected, this, &Form::clientConnected);
 
     QTableWidgetItem *newUuid = new QTableWidgetItem(rp->Id().toString());
     QTableWidgetItem *newIp = new QTableWidgetItem("tcp://127.0.0.1:"+port);
@@ -70,14 +75,35 @@ void Form::on_pushButton_connect_clicked()
     ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, newUuid);
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, newIp);
+
+    connections.push_back(QPair<QRemoteObjectNode*, RaftReplica*>(repNode, rp));
 }
 
 void Form::on_pushButton_send_clicked()
 {
     //emit raftSource.RequestVote(port);
+    raftSource.timerStart();
 }
 
 void Form::changeRole(Role role)
 {
     ui->label_role->setText(Helper::roleToString(role));
+}
+
+void Form::changeTerm(uint term)
+{
+    ui->label_term->setNum(static_cast<int>(term));
+}
+
+void Form::clientConnected(RaftReplica *rp)
+{
+    for(auto i = connections.begin(); i != connections.end(); ++i){
+        if(i->second == rp){
+            for(int r = 0; r < ui->tableWidget->rowCount(); r++){
+                if(ui->tableWidget->item(r, 1)->text().compare(i->first->property("ip").toString()) == 0){
+                    ui->tableWidget->item(r, 0)->setText(rp->Id().toString());
+                }
+            }
+        }
+    }
 }

@@ -1,8 +1,9 @@
 #ifndef RAFTREPLICA_H
 #define RAFTREPLICA_H
 
-#include "rep_RaftProtocol_replica.h"
+#include "rep_RaftProtocol_merged.h"
 #include <raftsource.h>
+#include <QTableWidgetItem>
 
 class RaftReplica: public QObject
 {
@@ -14,7 +15,8 @@ public:
     QUuid Id();
     void requestVote(QUuid id, uint term);
     void stateChanged(QRemoteObjectReplica::State state, QRemoteObjectReplica::State oldState);
-    void setId(QUuid id);
+signals:
+    void connected(RaftReplica *rp);
 };
 
 #endif // RAFTREPLICA_H
