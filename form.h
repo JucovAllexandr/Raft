@@ -24,7 +24,7 @@ public:
 
 private slots:
     void on_pushButton_bind_clicked();
-
+    void remoteObjectConnected(const QRemoteObjectSourceLocation &loc);
     void on_pushButton_connect_clicked();
 
     void on_pushButton_send_clicked();

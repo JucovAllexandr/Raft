@@ -1,6 +1,7 @@
 QT += gui core widgets
 QT += remoteobjects
 
+
 CONFIG += c++11 app
 
 REPC_SOURCE = RaftProtocol.rep

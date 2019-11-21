@@ -23,6 +23,11 @@ void RaftSource::setRole(Role role)
     emit roleChanged(role);
 }
 
+void RaftSource::getId()
+{
+    emit idReturned(id());
+}
+
 void RaftSource::timeOut()
 {
     setRole(Candidate);

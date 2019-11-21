@@ -27,6 +27,8 @@ private:
     void setRole(Role role);
 signals:
     void roleChanged(Role role);
+public slots:
+    void getId() override;
 private slots:
     void timeOut();
 };

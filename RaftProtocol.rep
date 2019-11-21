@@ -2,8 +2,10 @@
 
 class RaftProtocol
 {
-    PROP(QUuid id);
+    PROP(QUuid id READWRITE);
     SIGNAL(RequestVote(QUuid id, uint term))
     SLOT(ResponseVote(uint term, bool granted));
+    SLOT(getId());
+    SIGNAL(idReturned(QUuid id));
     SLOT(AppendEntries(QString id));
 };

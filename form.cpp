@@ -13,6 +13,7 @@ Form::Form(QWidget *parent) :
     ui->tableWidget->setColumnCount(2);
     ui->tableWidget->setHorizontalHeaderLabels(QStringList()<<"Uuid"<<"Ip");
     connect(&raftSource, &RaftSource::roleChanged, this, &Form::changeRole);
+    connect(&src, &QRemoteObjectHost::remoteObjectAdded, this, &Form::remoteObjectConnected);
 }
 
 void Form::messageHandler(QtMsgType type, const QMessageLogContext &, const QString &msg)
@@ -47,6 +48,12 @@ void Form::on_pushButton_bind_clicked()
     src.setHostUrl(QUrl("tcp://127.0.0.1:"+port));
     src.enableRemoting(&raftSource);
     ui->label_id->setText(raftSource.id().toString());
+
+}
+
+void Form::remoteObjectConnected(const QRemoteObjectSourceLocation &loc)
+{
+    qDebug()<<"RemoteObjectConnected "<<loc.first<<" "<<loc.second.hostUrl<<" "<<loc.second.typeName;
 }
 
 void Form::on_pushButton_connect_clicked()

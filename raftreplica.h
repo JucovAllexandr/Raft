@@ -14,6 +14,7 @@ public:
     QUuid Id();
     void requestVote(QUuid id, uint term);
     void stateChanged(QRemoteObjectReplica::State state, QRemoteObjectReplica::State oldState);
+    void setId(QUuid id);
 };
 
 #endif // RAFTREPLICA_H
