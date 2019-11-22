@@ -5,29 +5,36 @@
 #include <QUuid>
 #include <Role.h>
 #include <QTimer>
+#include <raftreplica.h>
 
+class RaftReplica;
 class RaftSource: public RaftProtocolSimpleSource
 {
+    friend class RaftReplica;
     Q_OBJECT
     uint currentTerm = 0;
     uint electionTimeout = 0;
     Role role = Follower;
     QTimer timer;
+    QVector<RaftReplica*> replics;
+    QVector<QPair<QUuid, bool>> votes;
 
 public:
     RaftSource(QObject *parent = nullptr);
-    void AppendEntries(QString id) override;
-    void ResponseVote(uint term, bool granted) override;
+    void ResponseVote(QUuid senderId,uint term, bool granted) override;
 
     uint getCurrentTerm() const;
 
     Role getRole() const;
     uint getElectionTimeout() const;
     void timerStart();
+    void timerStop();
 
 private:
     void setRole(Role role);
     void setCurrentTerm(const uint &value);
+    void addReplica(RaftReplica *rp);
+    void removeReplica(RaftReplica *rp);
 
 signals:
     void roleChanged(Role role);

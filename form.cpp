@@ -13,10 +13,12 @@ Form::Form(QWidget *parent) :
     ui->tableWidget->setColumnCount(2);
     ui->tableWidget->setHorizontalHeaderLabels(QStringList()<<"Uuid"<<"Ip");
     ui->timeEdit->setTime(QTime::currentTime());
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     connect(&raftSource, &RaftSource::roleChanged, this, &Form::changeRole);
     connect(&src, &QRemoteObjectHost::remoteObjectAdded, this, &Form::remoteObjectConnected);
     connect(&raftSource, &RaftSource::termChanged, this, &Form::changeTerm);
+    //connect(&timer, &QTimer::timeout, this, &Form::run);
 }
 
 void Form::messageHandler(QtMsgType type, const QMessageLogContext &, const QString &msg)
@@ -69,7 +71,7 @@ void Form::on_pushButton_connect_clicked()
     RaftReplica *rp = new RaftReplica(repNode->acquire<RaftProtocolReplica>(), &raftSource);
     connect(rp, &RaftReplica::connected, this, &Form::clientConnected);
 
-    QTableWidgetItem *newUuid = new QTableWidgetItem(rp->Id().toString());
+    QTableWidgetItem *newUuid = new QTableWidgetItem(rp->sourceId().toString());
     QTableWidgetItem *newIp = new QTableWidgetItem("tcp://127.0.0.1:"+port);
 
     ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
@@ -81,8 +83,18 @@ void Form::on_pushButton_connect_clicked()
 
 void Form::on_pushButton_send_clicked()
 {
-    //emit raftSource.RequestVote(port);
-    raftSource.timerStart();
+    qDebug()<<"Elapsed timer run";
+    QElapsedTimer timer;
+    QTime timeTo = ui->timeEdit->time();
+    timer.start();
+    int ms = 100;
+    while(!timer.hasExpired(ms)){
+        ms = QTime::currentTime().msecsTo(timeTo);
+        if(ms < 0){
+            break;
+        }
+    }
+    run();
 }
 
 void Form::changeRole(Role role)
@@ -101,9 +113,19 @@ void Form::clientConnected(RaftReplica *rp)
         if(i->second == rp){
             for(int r = 0; r < ui->tableWidget->rowCount(); r++){
                 if(ui->tableWidget->item(r, 1)->text().compare(i->first->property("ip").toString()) == 0){
-                    ui->tableWidget->item(r, 0)->setText(rp->Id().toString());
+                    ui->tableWidget->item(r, 0)->setText(rp->sourceId().toString());
                 }
             }
         }
     }
+}
+
+void Form::run()
+{
+    raftSource.timerStart();
+}
+
+void Form::on_pushButton_clicked()
+{
+    raftSource.timerStop();
 }

@@ -3,7 +3,7 @@
 class RaftProtocol
 {
     PROP(QUuid id SOURCEONLYSETTER);
-    SIGNAL(RequestVote(QUuid id, uint term));
-    SLOT(ResponseVote(uint term, bool granted));
-    SLOT(AppendEntries(QString id));
+    SIGNAL(RequestVote(QUuid candidateId, uint term));
+    SLOT(ResponseVote(QUuid senderId, uint term, bool granted));
+    SIGNAL(AppendEntries(uint term, QUuid leaderId));
 };
