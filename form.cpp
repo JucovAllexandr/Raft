@@ -18,7 +18,7 @@ Form::Form(QWidget *parent) :
     connect(&raftSource, &RaftSource::roleChanged, this, &Form::changeRole);
     connect(&src, &QRemoteObjectHost::remoteObjectAdded, this, &Form::remoteObjectConnected);
     connect(&raftSource, &RaftSource::termChanged, this, &Form::changeTerm);
-    //connect(&timer, &QTimer::timeout, this, &Form::run);
+    connect(&timer, &QTimer::timeout, this, &Form::run);
 }
 
 void Form::messageHandler(QtMsgType type, const QMessageLogContext &, const QString &msg)
@@ -50,10 +50,11 @@ Form::~Form()
 void Form::on_pushButton_bind_clicked()
 {
     port = ui->lineEdit_bind->text();
-    src.setHostUrl(QUrl("tcp://127.0.0.1:"+port));
-    src.enableRemoting(&raftSource);
-    ui->label_id->setText(raftSource.id().toString());
-
+    if(!port.isEmpty()){
+        src.setHostUrl(QUrl("tcp://127.0.0.1:"+port));
+        src.enableRemoting(&raftSource);
+        ui->label_id->setText(raftSource.id().toString());
+    }
 }
 
 void Form::remoteObjectConnected(const QRemoteObjectSourceLocation &loc)
@@ -64,28 +65,17 @@ void Form::remoteObjectConnected(const QRemoteObjectSourceLocation &loc)
 void Form::on_pushButton_connect_clicked()
 {
     QString port = ui->lineEdit_connect->text();
-    QRemoteObjectNode *repNode = new QRemoteObjectNode();
-    repNode->connectToNode(QUrl("tcp://127.0.0.1:"+port));
-    repNode->setProperty("ip", "tcp://127.0.0.1:"+port);
-
-    RaftReplica *rp = new RaftReplica(repNode->acquire<RaftProtocolReplica>(), &raftSource);
-    connect(rp, &RaftReplica::connected, this, &Form::clientConnected);
-
-    QTableWidgetItem *newUuid = new QTableWidgetItem(rp->sourceId().toString());
-    QTableWidgetItem *newIp = new QTableWidgetItem("tcp://127.0.0.1:"+port);
-
-    ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, newUuid);
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, newIp);
-
-    connections.push_back(QPair<QRemoteObjectNode*, RaftReplica*>(repNode, rp));
+    addConnection("tcp://127.0.0.1:"+port);
 }
 
 void Form::on_pushButton_send_clicked()
 {
     qDebug()<<"Elapsed timer run";
-    QElapsedTimer timer;
-    QTime timeTo = ui->timeEdit->time();
+    QTime timeTo;
+    timeTo.setHMS(ui->timeEdit->time().hour(), ui->timeEdit->time().minute(), 0);
+    timer.start(QTime::currentTime().msecsTo(timeTo));
+    /*QElapsedTimer timer;
+
     timer.start();
     int ms = 100;
     while(!timer.hasExpired(ms)){
@@ -93,8 +83,8 @@ void Form::on_pushButton_send_clicked()
         if(ms < 0){
             break;
         }
-    }
-    run();
+    }*/
+
 }
 
 void Form::changeRole(Role role)
@@ -122,10 +112,61 @@ void Form::clientConnected(RaftReplica *rp)
 
 void Form::run()
 {
+    qDebug()<<"Run "<<QTime::currentTime();
     raftSource.timerStart();
+    timer.stop();
 }
 
 void Form::on_pushButton_clicked()
 {
     raftSource.timerStop();
+}
+
+void Form::addConnection(QString url)
+{
+    if(url != src.hostUrl().toString()){
+        QRemoteObjectNode *repNode = new QRemoteObjectNode();
+        repNode->connectToNode(QUrl(url));
+        repNode->setProperty("ip", url);
+
+        RaftReplica *rp = new RaftReplica(repNode->acquire<RaftProtocolReplica>(), &raftSource);
+        connect(rp, &RaftReplica::connected, this, &Form::clientConnected);
+
+        QTableWidgetItem *newUuid = new QTableWidgetItem(rp->sourceId().toString());
+        QTableWidgetItem *newIp = new QTableWidgetItem(url);
+
+        ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
+        ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, newUuid);
+        ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, newIp);
+
+        connections.push_back(QPair<QRemoteObjectNode*, RaftReplica*>(repNode, rp));
+    }
+}
+
+void Form::on_pushButton_load_file_clicked()
+{
+    QString fileName;
+    dlg.setFileMode(QFileDialog::AnyFile);
+
+    if(dlg.exec()){
+        fileName = dlg.selectedFiles().first();
+        qDebug()<<fileName;
+    }
+
+    if(!fileName.isEmpty()){
+        QFile file(fileName);
+
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+            return;
+        }
+
+        QTextStream in(&file);
+        QString line = in.readLine();
+
+        while (!line.isNull()) {
+            qDebug()<<line;
+            addConnection(line);
+            line = in.readLine();
+        }
+    }
 }

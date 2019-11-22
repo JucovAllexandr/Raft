@@ -54,13 +54,18 @@ void RaftSource::setRole(Role role)
 
 void RaftSource::timeOut()
 {
-    for(int i = 0; i <votes.size(); ++i){
+    /*for(int i = 0; i <votes.size(); ++i){
         votes[i].second = false;
-    }
-
+    }*/
+    if(role == Leader){
+        emit AppendEntries(currentTerm, id());
+    }else {
     setRole(Candidate);
+    electionTimeout = static_cast<uint>(Helper::randomBetween(100, 300));
+    timer.start(static_cast<int>(electionTimeout));
     setCurrentTerm(currentTerm + 1);
     emit RequestVote(id(), currentTerm);
+    }
 }
 
 void RaftSource::setCurrentTerm(const uint &value)
@@ -95,14 +100,20 @@ void RaftSource::ResponseVote(QUuid senderId, uint term, bool granted)
     if(!votes.isEmpty()){
         if(votes.size() == 2){
             if(voted >= votes.size() / 2){
-                timer.stop();
+                timer.start(1);
+                for(int i = 0; i <votes.size(); ++i){
+                    votes[i].second = false;
+                }
                 setRole(Leader);
                 setCurrentTerm(currentTerm+1);
                 emit AppendEntries(currentTerm, id());
             }
         }
         else if(voted > votes.size() / 2){
-            timer.stop();
+            timer.start(1);
+            for(int i = 0; i <votes.size(); ++i){
+                votes[i].second = false;
+            }
             setRole(Leader);
             setCurrentTerm(currentTerm+1);
             emit AppendEntries(currentTerm, id());

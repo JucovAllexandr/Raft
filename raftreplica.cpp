@@ -34,9 +34,12 @@ void RaftReplica::requestVote(QUuid candidateId, uint term)
 
         if(votedFor == candidateId){
             replica->ResponseVote(source->id(), term, true);
+            source->timer.start(static_cast<int>(source->electionTimeout));
         }else{
             replica->ResponseVote(source->id(), term, false);
         }
+    }else if (source->getRole() == Candidate){
+        replica->ResponseVote(source->id(), term, false);
     }
 }
 
@@ -52,6 +55,7 @@ void RaftReplica::AppendEntries(uint term, QUuid leaderId)
     }
 
     source->timerStop();
+    source->timerStart();
 }
 
 
@@ -63,6 +67,9 @@ void RaftReplica::stateChanged(QRemoteObjectReplica::State state, QRemoteObjectR
         source->addReplica(this);
         emit connected(this);
 
+    }else if (state == QRemoteObjectReplica::Suspect){
+        source->removeReplica(this);
     }
+
 }
 

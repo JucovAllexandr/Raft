@@ -4,7 +4,7 @@
 #include <QtRemoteObjects>
 #include <raftreplica.h>
 #include <raftsource.h>
-
+#include <QFileDialog>
 #include <QWidget>
 
 namespace Ui {
@@ -18,6 +18,8 @@ class Form : public QWidget
     RaftSource raftSource;
     QString port;
     QVector<QPair<QRemoteObjectNode*, RaftReplica*>> connections;
+    QTimer timer;
+    QFileDialog dlg;
 public:
     explicit Form(QWidget *parent = nullptr);
     void messageHandler(QtMsgType type, const QMessageLogContext&, const QString& msg);
@@ -34,6 +36,8 @@ private slots:
     void clientConnected(RaftReplica *rp);
     void run();
     void on_pushButton_clicked();
+    void addConnection(QString url);
+    void on_pushButton_load_file_clicked();
 
 private:
     Ui::Form *ui;

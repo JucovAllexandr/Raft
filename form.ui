@@ -116,6 +116,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_load_file">
+         <property name="text">
+          <string>Connect from file</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>
@@ -138,7 +145,7 @@
      <item>
       <widget class="QTimeEdit" name="timeEdit">
        <property name="displayFormat">
-        <string>h:mm:ss</string>
+        <string>h:mm</string>
        </property>
       </widget>
      </item>
