@@ -18,7 +18,7 @@ class RaftSource: public RaftProtocolSimpleSource
     QTimer timer;
     QVector<RaftReplica*> replics;
     QVector<QPair<QUuid, bool>> votes;
-
+    QVector<QVector<QString>> entries;
 public:
     RaftSource(QObject *parent = nullptr);
     void ResponseVote(QUuid senderId,uint term, bool granted) override;
