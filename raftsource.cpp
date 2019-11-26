@@ -58,13 +58,13 @@ void RaftSource::timeOut()
         votes[i].second = false;
     }*/
     if(role == Leader){
-        emit AppendEntries(currentTerm, id());
+        emit AppendEntries(currentTerm, id(), 0, 0, "", 0);
     }else {
-    setRole(Candidate);
-    electionTimeout = static_cast<uint>(Helper::randomBetween(100, 300));
-    timer.start(static_cast<int>(electionTimeout));
-    setCurrentTerm(currentTerm + 1);
-    emit RequestVote(id(), currentTerm);
+        setRole(Candidate);
+        electionTimeout = static_cast<uint>(Helper::randomBetween(100, 300));
+        timer.start(static_cast<int>(electionTimeout));
+        setCurrentTerm(currentTerm + 1);
+        emit RequestVote(id(), currentTerm);
     }
 }
 
@@ -106,7 +106,7 @@ void RaftSource::ResponseVote(QUuid senderId, uint term, bool granted)
                 }
                 setRole(Leader);
                 setCurrentTerm(currentTerm+1);
-                emit AppendEntries(currentTerm, id());
+                emit AppendEntries(currentTerm, id(), 0, 0, "", 0);
             }
         }
         else if(voted > votes.size() / 2){
@@ -116,7 +116,7 @@ void RaftSource::ResponseVote(QUuid senderId, uint term, bool granted)
             }
             setRole(Leader);
             setCurrentTerm(currentTerm+1);
-            emit AppendEntries(currentTerm, id());
+            emit AppendEntries(currentTerm, id(), 0, 0, "", 0);
         }
     }
 

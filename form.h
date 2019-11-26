@@ -20,6 +20,7 @@ class Form : public QWidget
     QVector<QPair<QRemoteObjectNode*, RaftReplica*>> connections;
     QTimer timer;
     QFileDialog dlg;
+
 public:
     explicit Form(QWidget *parent = nullptr);
     void messageHandler(QtMsgType type, const QMessageLogContext&, const QString& msg);

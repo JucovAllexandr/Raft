@@ -19,6 +19,8 @@ Form::Form(QWidget *parent) :
     connect(&src, &QRemoteObjectHost::remoteObjectAdded, this, &Form::remoteObjectConnected);
     connect(&raftSource, &RaftSource::termChanged, this, &Form::changeTerm);
     connect(&timer, &QTimer::timeout, this, &Form::run);
+
+
 }
 
 void Form::messageHandler(QtMsgType type, const QMessageLogContext &, const QString &msg)

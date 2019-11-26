@@ -3,8 +3,6 @@
 
 RaftReplica::RaftReplica(RaftProtocolReplica *replica, RaftSource *source):QObject(nullptr), source(source), replica(replica)
 {
-
-
     connect(replica, &RaftProtocolReplica::RequestVote, this, &RaftReplica::requestVote);
     connect(replica, &RaftProtocolReplica::AppendEntries, this, &RaftReplica::AppendEntries);
     connect(replica, &RaftProtocolReplica::stateChanged, this, &RaftReplica::stateChanged);
