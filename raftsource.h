@@ -7,10 +7,19 @@
 #include <QTimer>
 #include <raftreplica.h>
 
+
 class RaftReplica;
 class RaftSource: public RaftProtocolSimpleSource
 {
     friend class RaftReplica;
+
+    struct Entity{
+        uint term;
+        QString msg;
+        Entity(){term = 0;}
+        Entity(uint term, QString msg):term(term), msg(msg){}
+    };
+
     Q_OBJECT
     uint currentTerm = 0;
     uint electionTimeout = 0;
@@ -18,7 +27,11 @@ class RaftSource: public RaftProtocolSimpleSource
     QTimer timer;
     QVector<RaftReplica*> replics;
     QVector<QPair<QUuid, bool>> votes;
-    QVector<QVector<QString>> entries;
+    QVector<Entity> entries;
+    uint prevLogTerm = 0;
+    uint prevIndex = 0;
+    uint commitedIndex = 0;
+
 public:
     RaftSource(QObject *parent = nullptr);
     void ResponseVote(QUuid senderId,uint term, bool granted) override;
@@ -35,6 +48,7 @@ private:
     void setCurrentTerm(const uint &value);
     void addReplica(RaftReplica *rp);
     void removeReplica(RaftReplica *rp);
+
     void AppendString(QString str) override;
     void checkLeader() override;
 

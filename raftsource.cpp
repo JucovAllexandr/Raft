@@ -51,6 +51,9 @@ void RaftSource::AppendString(QString str)
 {
     if(role == Leader){
         qDebug()<<"Append string "<<str;
+        entries.push_back(Entity(currentTerm, str));
+        prevLogTerm = currentTerm;
+
     }
 }
 
@@ -59,7 +62,6 @@ void RaftSource::checkLeader()
     qDebug()<<"isLeader "<<(role == Leader);
     emit isLeader(role == Leader);
 }
-
 
 void RaftSource::setRole(Role role)
 {
