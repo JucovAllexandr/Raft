@@ -52,7 +52,7 @@ void RaftReplica::AppendEntries(uint term, QUuid leaderId)
         source->setRole(Follower);
     }
 
-    source->timerStop();
+   // source->timerStop();
     source->timerStart();
 }
 

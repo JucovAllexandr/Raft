@@ -6,5 +6,7 @@ class RaftProtocol
     SIGNAL(RequestVote(QUuid candidateId, uint term));
     SLOT(ResponseVote(QUuid senderId, uint term, bool granted));
     SIGNAL(AppendEntries(uint term, QUuid leaderId, int prevLogIndex, int prevLogTerm, QString entries, int commitIndex));
-    SIGNAL(AppendString(QString str));
+    SLOT(AppendString(QString str));
+    SLOT(checkLeader());
+    SIGNAL(isLeader(bool leader));
 };

@@ -35,6 +35,8 @@ private:
     void setCurrentTerm(const uint &value);
     void addReplica(RaftReplica *rp);
     void removeReplica(RaftReplica *rp);
+    void AppendString(QString str) override;
+    void checkLeader() override;
 
 signals:
     void roleChanged(Role role);

@@ -24,6 +24,7 @@ void RaftSource::timerStart()
         qDebug()<<votes.at(i);
     }
     timer.start(static_cast<int>(electionTimeout));
+
 }
 
 void RaftSource::timerStop()
@@ -45,6 +46,20 @@ void RaftSource::removeReplica(RaftReplica *rp)
         votes.push_back(QPair<QUuid, bool>(replics.at(i)->sourceId(), false));
     }
 }
+
+void RaftSource::AppendString(QString str)
+{
+    if(role == Leader){
+        qDebug()<<"Append string "<<str;
+    }
+}
+
+void RaftSource::checkLeader()
+{
+    qDebug()<<"isLeader "<<(role == Leader);
+    emit isLeader(role == Leader);
+}
+
 
 void RaftSource::setRole(Role role)
 {
@@ -80,6 +95,7 @@ RaftSource::RaftSource(QObject *parent):
     setId(QUuid::createUuid());
     electionTimeout = static_cast<uint>(Helper::randomBetween(100, 300));
     connect(&timer, &QTimer::timeout, this, &RaftSource::timeOut);
+
 }
 
 void RaftSource::ResponseVote(QUuid senderId, uint term, bool granted)
@@ -100,7 +116,7 @@ void RaftSource::ResponseVote(QUuid senderId, uint term, bool granted)
     if(!votes.isEmpty()){
         if(votes.size() == 2){
             if(voted >= votes.size() / 2){
-                timer.start(1);
+                timer.start(50);
                 for(int i = 0; i <votes.size(); ++i){
                     votes[i].second = false;
                 }
@@ -110,7 +126,7 @@ void RaftSource::ResponseVote(QUuid senderId, uint term, bool granted)
             }
         }
         else if(voted > votes.size() / 2){
-            timer.start(1);
+            timer.start(50);
             for(int i = 0; i <votes.size(); ++i){
                 votes[i].second = false;
             }
